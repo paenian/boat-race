@@ -2,15 +2,15 @@ in = 25.4;
 height = 157;
 rad = 19;
 leg_rad = 7;
-leg_angle = 13;
-brace_angle = 31;
-brace_height = -45;
+leg_angle = 13+4;
+brace_angle = 37;
+brace_height = -41;
 
 axle_rad = 5/2;
 
 brace_rad = 6;
 
-odoshi_angle = 43;
+odoshi_angle = 53;
 odoshi_lift = 47; //29;   //this is the space at the base, so that we're sure it'll get top-heavy and tip over.
 
 wall = 3;
@@ -22,12 +22,11 @@ $fn = 60;
 shishi();
 
 //for printing
-!rotate([-odoshi_angle,0,0])
-//rotate([50,0,0]) 
+*rotate([-odoshi_angle,0,0])
 odoshi();
 
 //for positioning
-rotate([50,0,0]) 
+rotate([0,0,0]) 
 odoshi();
 
 
@@ -58,8 +57,8 @@ module base_pipes(solid=1, base=true){
     
     drip_wall = 2;
     drip_rad = 4;
-    drip_len = 20;
-    drip_angle = -75;
+    drip_len = 23;
+    drip_angle = -67;
     
     
     base_rad = leg_rad+2;
@@ -168,7 +167,7 @@ module odoshi(wall = 2){
         rotate([0,-90,0]) cap_tube(r=axle_rad+wall+1, h=rad*2+leg_rad*2+wall*2, solid=-1, wall=wall);
         
         //cut the top
-        rotate([-odoshi_angle,0,0]) translate([0,0,height/2+50-29]) cube([200,200,100], center=true);
+        rotate([-odoshi_angle,0,0]) translate([0,0,height/2+50-29-13]) cube([200,200,100], center=true);
         
         //cut the bottom?
     }
