@@ -22,16 +22,19 @@ drip_rad = 4;
 drip_len = 13;
 drip_angle = -67;
 
+%translate([0,0,height/2-7]) cylinder(r=36, h=.1, center=true);
+%translate([0,0,height/2+9.5]) cylinder(r=36, h=.1, center=true);
+
 inlet_rad = 3/8*in/2;
 inlet_wall = 2;
-inlet_length = 13+leg_rad;
-inlet_angle = 43;
-inlet_offset = width/2;
+inlet_length = 13+6;
+inlet_angle = 31;
+inlet_offset = 0;
 
 echo(drip_rad-drip_wall);
 echo(inlet_rad-inlet_wall);
 
-axle_rad = 5/2;
+axle_rad = 7/2;
 
 
 
@@ -46,7 +49,7 @@ odoshi_lift = 47; //29;   //this is the space at the base, so that we're sure it
 
 $fn = 60;
 
-difference(){
+!difference(){
     shishi();
     *translate([0,100,0]) cube([200,200,200], center=true); //slices to check the internal pipes
     *translate([100,0,0]) cube([200,200,200], center=true);
@@ -63,7 +66,7 @@ odoshi();
 
 
 //an axle that screws in
-!flip_axle();
+flip_axle();
 
 module flip_axle(){
     cap = axle_rad/2+1;
@@ -254,7 +257,7 @@ module frame(solid = 1){
     pipe_rad = leg_rad;
     output_len = 57;
     
-    upper_frame_lift = 17;
+    upper_frame_lift = 13;
     
     tube_id = 1/4*in;
     tube_rad = tube_id/2;
@@ -277,8 +280,8 @@ module frame(solid = 1){
     rotate([leg_angle,0,0])
     translate([0,0,0]) rotate([0,0,90]) rotate([90,0,0]) rotate([0,0,90]) cap_tube(r=leg_rad, h=width*2, solid=solid, wall=wall);
     
-    //and this is the inlet - connects to 3/8OD, 1/4ID hose.
-    rotate([leg_angle,0,0]) translate([inlet_offset,0,-height/2+leg_rad]) rotate([-leg_angle,0,0]) translate([0,-42,0]) rotate([inlet_angle,0,0]) translate([0,-inlet_length/2,0,0]) rotate([90,0,0]) rotate([0,0,-90]) translate([0,0,-inlet_length/2]) cap_tube(r=inlet_rad, h=inlet_length, solid=solid, wall=inlet_wall);
+    //and this is the inlet - connects to 1/2OD, 3/8ID hose.
+    rotate([leg_angle,0,0]) translate([inlet_offset,0,-height/2+leg_rad]) rotate([-leg_angle,0,0]) translate([0,-42,0]) rotate([inlet_angle,0,0]) translate([0,-inlet_length/2,0,0]) rotate([90,0,0]) rotate([0,0,-90]) translate([0,0,-inlet_length/2]) rotate([0,0,180]) cap_tube(r=inlet_rad, h=inlet_length, solid=solid, wall=inlet_wall);
     
     
     //lower frame
@@ -288,7 +291,7 @@ module frame(solid = 1){
         rotate([-leg_angle,0,0]) rotate([0,0,90]) translate([0,0,-height/4]) cap_tube(r=leg_rad, h=height/2-leg_rad*2, solid=solid, wall=wall);
         
         //this is to let water flow around the axle
-        rotate([0,-90,0]) cap_tube(r=axle_rad+wall*3, h=leg_rad*2+solid*wall/2, solid=solid, wall=wall);
+        rotate([0,-90,0]) cap_tube(r=axle_rad+wall*3, h=leg_rad*2-wall/2+solid*wall, solid=solid, wall=wall);
     }
     
     //upper frame - meetup in the middle
@@ -300,28 +303,31 @@ module frame(solid = 1){
         translate([0,0,upper_frame_lift]) sphere(r=(leg_rad*2+solid*wall)/2);
         
         //angled beams to meet in the middle
-        translate([0,0,upper_frame_lift]) rotate([0,-43,0]) rotate([0,0,180]) translate([0,0,43/2]) cap_tube(r=leg_rad, h=43, solid=solid, wall=wall);
+        translate([0,0,upper_frame_lift]) rotate([0,-39.75,0]) rotate([0,0,180]) translate([0,0,49/2]) rotate([0,0,180]) cap_tube(r=leg_rad, h=49, solid=solid, wall=wall);
     }
     
     //this is the final outlet!
     if(solid == 1){
         hull(){
             mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
-        rotate([drip_angle,0,0]) rotate([0,0,90]) cap_tube(solid=solid, r=drip_rad, h=drip_len, center=false, outside=true, wall=drip_wall);
+        rotate([drip_angle,0,0]) rotate([0,0,-90]) cap_tube(solid=solid, r=drip_rad, h=drip_len, center=false, outside=true, wall=drip_wall);
             translate([0,0,49]) sphere(r=(leg_rad*2+solid*wall)/2);
         }
     }else{
         //inside path
         hull(){
             mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
-        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) cap_tube(solid=solid, r=drip_rad, h=drip_len-wall*4, center=false, outside=true, wall=drip_wall);
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) cap_tube(solid=solid, r=drip_rad, h=drip_len-wall*3, center=false, outside=true, wall=drip_wall);
             translate([0,0,50]) sphere(r=(leg_rad*2+solid*wall)/2);
         }
         //exit
         mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
-        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) cap_tube(solid=solid, r=drip_rad, h=drip_len+wall*2, center=false, outside=true, wall=drip_wall);
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) rotate([0,0,180]) cap_tube(solid=solid, r=drip_rad, h=drip_len+wall*2, center=false, outside=true, wall=drip_wall);
         //cut the tip a bit
-        translate([0,-61,70+drip_len/2-1]) rotate([5,0,0]) cube([30,50,50], center=true);
+        translate([0,-61,70+drip_len/2-5]) rotate([13,0,0]) cube([30,50,50], center=true);
+        
+        //cut the top, for no reason.
+        translate([0,0,height/2+8]) cylinder(r=50, h=10);
     }
     
     
@@ -341,25 +347,25 @@ module shishi(){
                 frame(solid=1);
                 
                 hull(){
-                    translate([0,0,-height/2+leg_rad/2+.75]) gutter_inside(h=200);
+                    translate([0,0,-height/2+leg_rad/2-1.8]) gutter_inside(h=200);
                     translate([0,0,height/2]) gutter_inside(h=200);
                 }
             }
             
             
             //axle
-            #for(i=[0,1]) mirror([i,0,0]) translate([rad+wall+leg_rad,0,0]) rotate([0,90,0]) cap_tube(r=axle_rad+wall, h=leg_rad*2, solid=1, wall=wall);
+            for(i=[0,1]) mirror([i,0,0]) translate([rad+wall+leg_rad,0,0]) rotate([0,-90,0]) cap_tube(r=axle_rad+wall, h=leg_rad*2, solid=1, wall=wall);
         }
         
         difference(){
             frame(solid=-1);
             
             //axle
-            rotate([0,90,0]) cap_tube(r=axle_rad+wall, h=200, solid=1, wall=wall);
+            rotate([0,-90,0]) cap_tube(r=axle_rad+wall, h=200, solid=1, wall=wall);
         }
         
         //axle
-        rotate([0,90,0]) cap_tube(r=axle_rad+wall, h=200, solid=-1, wall=wall);
+        rotate([0,-90,0]) cap_tube(r=axle_rad+wall, h=200, solid=-1, wall=wall);
         
         //flatten the base a little
         *translate([0,0,-100-height/2+4]) cube([200,200,200], center=true);
