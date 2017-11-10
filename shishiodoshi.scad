@@ -16,9 +16,11 @@ brace_angle = 31;
 brace_height = -41;
 brace_rad = 7;
 
-//this is the final outlet!
+//this is the final outlet
+//change of plans: outlet is printed separately.  So this is thick now.
 drip_wall = 2;
-drip_rad = 4;
+inside_drip_wall = 3;
+drip_rad = 7;
 drip_len = 13;
 drip_angle = -67;
 
@@ -28,7 +30,7 @@ drip_angle = -67;
 inlet_rad = 3/8*in/2;
 inlet_wall = 2;
 inlet_length = 13+6;
-inlet_angle = 31;
+inlet_angle = 23;
 inlet_offset = 0;
 
 echo(drip_rad-drip_wall);
@@ -49,8 +51,14 @@ odoshi_lift = 47; //29;   //this is the space at the base, so that we're sure it
 
 $fn = 60;
 
-!difference(){
-    shishi();
+drip_spout();
+
+difference(){
+    union(){
+        shishi();
+        
+            
+    }
     *translate([0,100,0]) cube([200,200,200], center=true); //slices to check the internal pipes
     *translate([100,0,0]) cube([200,200,200], center=true);
 }
@@ -66,7 +74,53 @@ odoshi();
 
 
 //an axle that screws in
-flip_axle();
+!flip_axle();
+
+module drip_spout(solid=1){
+    bump_height = 10;
+    pipe_rad = leg_rad;
+    output_len = 57;
+    
+    drip_rad = drip_rad-drip_wall-.1;
+    
+    translate([0,0,66.8]) rotate([0,180,0]) rotate([drip_angle,0,0])
+    difference(){
+        union(){
+            mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,-.1]) rotate([0,0,180])
+            {
+                //cap on top
+                translate([0,0,-wall]) cap_tube(solid=1, r=drip_rad+2, h=wall, center=false, outside=true, wall=drip_wall);
+            
+                //the tube
+                cap_tube(solid=1, r=drip_rad, h=drip_len+wall*2+5, center=false, outside=true, wall=drip_wall);
+            
+            }
+        }
+        
+        //outlet hole
+        mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall])
+        {
+            
+            cap_tube(solid=-1, r=drip_rad, h=drip_len+wall*2+5, center=false, outside=true, wall=drip_wall);
+            
+        }
+        
+        //cut a hole in the side
+        hull(){
+            mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) cap_tube(solid=-1, r=drip_rad+drip_wall-.5, h=drip_len-wall*3, center=false, outside=true, wall=inside_drip_wall);
+            translate([0,0,50]) sphere(r=(leg_rad*2+0*wall)/2);
+        }
+        
+        //oh fine, we'll lop off the tip.  Whatevs.
+        translate([0,-61,70+drip_len/2-31]) rotate([13,0,0]) cube([30,50,50], center=true);
+        
+        //flatten one side for easy printing
+        translate([0,-61-6.2,70+drip_len/2]) rotate([-drip_angle,0,0]) cube([30,100,50], center=true);
+    }
+}
 
 module flip_axle(){
     cap = axle_rad/2+1;
@@ -76,10 +130,12 @@ module flip_axle(){
     flip_offset = length/2-flip+9;
     flip_drop = -1;
     
-    axle_slop = .2;
+    axle_slop = .25;
+    flip_slop = .5;
     axle_r1 = .75;
-    axle_r2 = 2;
-    axle_len = 3;
+    axle_r2 = 4;
+    axle_len = 8;
+    flip_angle = 45;
     
     translate([8,0,0])
     difference(){
@@ -92,24 +148,26 @@ module flip_axle(){
         //other end rotates down
         difference(){
             //angled cut
-            translate([flip_offset,0,0]) rotate([0,45,0])
-        cube([axle_slop,10,10], center=true);
+            translate([flip_offset,0,0]) rotate([0,flip_angle,0])
+        cube([flip_slop,10,10], center=true);
             
             //leave the axis to rotate around
-            translate([flip_offset,0,0]) rotate([0,-45,0]) translate([flip_drop,0,-axle_slop/2-.01]) cylinder(r1=axle_r1, r2=axle_r2, h=axle_len);
+            translate([flip_offset,0,0]) rotate([0,-flip_angle,0]) translate([flip_drop,0,-flip_slop/2-.01]) cylinder(r1=axle_r1, r2=axle_r2, h=axle_len);
         }
         
         //carve out around the axle
         difference(){
-            translate([flip_offset,0,0]) rotate([0,-45,0]) translate([flip_drop,0,-axle_slop/2-.01]) cylinder(r1=axle_r1+axle_slop, r2=axle_r2+axle_slop, h=axle_len+axle_slop);
+            translate([flip_offset,0,0]) rotate([0,-flip_angle,0]) translate([flip_drop,0,-axle_slop/2-.01]) cylinder(r1=axle_r1+flip_slop, r2=axle_r2+flip_slop, h=axle_len+axle_slop);
             
-            translate([flip_offset,0,0]) rotate([0,-45,0]) translate([flip_drop,0,-axle_slop/2-.01]) cylinder(r1=axle_r1, r2=axle_r2, h=axle_len);
+            translate([flip_offset,0,0]) rotate([0,-flip_angle,0]) translate([flip_drop,0,-flip_slop/2-.01]) cylinder(r1=axle_r1, r2=axle_r2, h=axle_len);
         }
         
         //ensure a flat bottom
         translate([0,0,-100-axle_rad+axle_slop+.01]) cube([200,200,200], center=true);
     }
 }
+
+
 
 //a rubber cap type base/top.
 //deprecated!
@@ -310,24 +368,25 @@ module frame(solid = 1){
     if(solid == 1){
         hull(){
             mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
-        rotate([drip_angle,0,0]) rotate([0,0,-90]) cap_tube(solid=solid, r=drip_rad, h=drip_len, center=false, outside=true, wall=drip_wall);
+        rotate([drip_angle,0,0]) rotate([0,0,-90]) cap_tube(solid=solid, r=drip_rad, h=drip_len-wall, center=false, outside=true, wall=drip_wall);
             translate([0,0,49]) sphere(r=(leg_rad*2+solid*wall)/2);
         }
     }else{
         //inside path
         hull(){
             mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
-        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) cap_tube(solid=solid, r=drip_rad, h=drip_len-wall*3, center=false, outside=true, wall=drip_wall);
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) cap_tube(solid=solid, r=drip_rad, h=drip_len-wall*3, center=false, outside=true, wall=inside_drip_wall);
             translate([0,0,50]) sphere(r=(leg_rad*2+solid*wall)/2);
         }
         //exit
         mirror([0,0,1]) translate([0,-output_len,0]) rotate([leg_angle,0,0]) translate([0,0,-height/2-pipe_rad-bump_height/2]) rotate([90-leg_angle,0,0])
-        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) rotate([0,0,180]) cap_tube(solid=solid, r=drip_rad, h=drip_len+wall*2, center=false, outside=true, wall=drip_wall);
+        rotate([drip_angle,0,0]) rotate([0,0,90]) translate([0,0,wall]) rotate([0,0,180]) cap_tube(solid=solid, r=drip_rad, h=drip_len*2+wall*2, center=true, outside=true, wall=drip_wall);
+        
         //cut the tip a bit
-        translate([0,-61,70+drip_len/2-5]) rotate([13,0,0]) cube([30,50,50], center=true);
+        translate([0,-61,70+drip_len/2-7]) rotate([13,0,0]) cube([30,50,50], center=true);
         
         //cut the top, for no reason.
-        translate([0,0,height/2+8]) cylinder(r=50, h=10);
+        translate([0,0,height/2+9]) cylinder(r=50, h=10);
     }
     
     
