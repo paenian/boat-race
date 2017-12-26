@@ -9,15 +9,15 @@ center_wall = 16;
 bottom_width = 2.75*in+.2*in;
 top_width = 4.025*in - wall*2+.2*in;
 mid_height = 1.3*in;
-top_height = 2*in;
+top_height = 2*in+1;
 min_rad = .15*in;
 
 
 $fn=60;
 
 rotate([90,0,0]) gutter_mount(h=20);
-!rotate([90,0,0]) gutter_mount_double(h=20);
-rotate([90,0,0]) gutter_mount_triple(h=20);
+rotate([90,0,0]) gutter_mount_double(h=20);
+!rotate([90,0,0]) gutter_mount_triple(h=20);
 
 
 rotate([90,0,0]) translate([top_width+center_wall/2+wall*2,0,0]) rotate([0,0,180]) gutter_mount(h=20);
@@ -56,12 +56,17 @@ module gutter(h=25){
 }
 
 module gutter_mount_triple(h=10){
-    union(){
-        gutter_mount_double(h=20);
+    difference(){
+        union(){
+            gutter_mount_double(h=20);
         
-        translate([top_width+center_wall/2+wall*2,0,0]) rotate([0,0,180]) gutter_mount(h=20);
+            translate([top_width+center_wall/2+wall*2,0,0]) rotate([0,0,180]) gutter_mount(h=20);
         
-        translate([(top_width+center_wall+wall*2)/2,0,-mount_wall/2]) cube([25,h,mount_wall], center=true);
+            translate([(top_width+center_wall+wall*2)/2,0,-mount_wall/2]) cube([25,h,mount_wall], center=true);
+        }
+        
+        //make some screwholes on the ends
+        translate([top_width+center_wall/2+wall,0,0]) screwhole(angle = true);
     }
 }
 
@@ -75,7 +80,7 @@ module gutter_mount_double(h=10){
         //center hole for pipes or whatevs
         translate([0,0,10]) rotate([90,0,0]) scale([.8,1,1]) rotate([0,0,90]) cylinder(r=center_wall+5, h=h*3, center=true, $fn=3);
         
-         #screwhole();
+         screwhole();
     }
         
     %cylinder(r=center_wall/2, h=200, center=true);
@@ -106,7 +111,7 @@ module gutter_mount(single = false, h=10){
             }
             
             //leave a notch around the top to secure it
-            translate([(wall)/2+wall+1,0,top_height+wall-1]) hull(){
+            translate([(wall)/2+wall+1.5,0,top_height+wall-1]) hull(){
                 rotate([90,0,0]) cylinder(r=wall/2+1, h=h+10, center=true);
                 translate([0,0,10]) rotate([90,0,0]) cylinder(r=wall/2+1, h=h+10, center=true);
             }
@@ -117,18 +122,29 @@ module gutter_mount(single = false, h=10){
         translate([h*1.5*sqrt(2) + top_width/2+wall-.2,0,h*1.5-mount_wall/2-.1]) rotate([0,0,-45]) cube([h*3,h*12,h*3], center=true);
         
         //mounting hole
-        translate([top_width/3.5,0,0]) screwhole();
+        *translate([top_width/3.5,0,0]) screwhole();
     }
 }
 
 //todo: we'll need fancy inset screws.
-module screwhole(){
+module screwhole(angle = false){
     screw_rad = 2.5+.2;
     screw_cap_rad = 5.2;
     screw_cap_height = 3.5;
     
-    cylinder(r=screw_rad, h=300, center=true);
+    if(angle==false){
+        cylinder(r=screw_rad, h=300, center=true);
+    }else{
+        translate([0,0,-49]) cylinder(r=screw_rad, h=50);
+    }
     translate([0,0,-screw_cap_height]) cylinder(r1=screw_rad, r2=screw_cap_rad, h=screw_cap_height);
     translate([0,0,-.1]) cylinder(r=screw_cap_rad, h=screw_cap_height*4+.1);
+    
+    if(angle==true){
+        hull(){
+            translate([0,0,-screw_cap_height]) cylinder(r1=screw_rad, r2=screw_cap_rad, h=screw_cap_height);
+            rotate([0,20,0]) translate([0,0,-.1]) cylinder(r=screw_cap_rad, h=screw_cap_height*20);
+        }
+    }
     
 }
