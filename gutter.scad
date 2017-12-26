@@ -15,20 +15,27 @@ min_rad = .15*in;
 
 $fn=60;
 
-rotate([90,0,0]) gutter_mount(h=20);
-rotate([90,0,0]) gutter_mount_double(h=20);
-!rotate([90,0,0]) gutter_mount_triple(h=20);
+//rotate([90,0,0]) gutter_mount(h=20);
+//rotate([90,0,0]) gutter_mount_double(h=20);
+rotate([90,0,0]) gutter_mount_triple(h=20);
 
 
-rotate([90,0,0]) translate([top_width+center_wall/2+wall*2,0,0]) rotate([0,0,180]) gutter_mount(h=20);
+//rotate([90,0,0]) translate([top_width+center_wall/2+wall*2,0,0]) rotate([0,0,180]) gutter_mount(h=20);
 
-%gutter();
+//%gutter();
 
-*gutter_helper(solid=0);
+translate([top_width/2+center_wall/2+2,0,0]) rotate([90,0,0]) {gutter_inside();
+    %cube([94,50,50], center=true);
+}
 
-module gutter_inside(h=25){
-    scale([1,h/10,1])
-    gutter_helper(solid=0);
+module gutter_inside(h=in * 6){
+    scale([.99,h/10,.99])
+    difference(){
+        gutter_helper(solid=0);
+        echo((top_width/2-4.25)*2*.99);
+        
+        for(i=[0,1]) mirror([i,0,0]) translate([50+top_width/2-4.25,0,0]) cube([100,100,200], center=true);
+    }
 }
 
 module gutter_helper(solid=1){
@@ -128,7 +135,7 @@ module gutter_mount(single = false, h=10){
 
 //todo: we'll need fancy inset screws.
 module screwhole(angle = false){
-    screw_rad = 2.5+.2;
+    screw_rad = 2.5+.3;
     screw_cap_rad = 5.2;
     screw_cap_height = 3.5;
     
