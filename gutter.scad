@@ -12,29 +12,130 @@ mid_height = 1.3*in;
 top_height = 2*in+1;
 min_rad = .15*in;
 
+notch_inset = 12;
 
 $fn=60;
 
 //rotate([90,0,0]) gutter_mount(h=20);
 //rotate([90,0,0]) gutter_mount_double(h=20);
-rotate([90,0,0]) gutter_mount_triple(h=20);
+//rotate([90,0,0]) gutter_mount_triple(h=20);
 
 
 //rotate([90,0,0]) translate([top_width+center_wall/2+wall*2,0,0]) rotate([0,0,180]) gutter_mount(h=20);
 
 //%gutter();
 
-translate([top_width/2+center_wall/2+2,0,0]) rotate([90,0,0]) {gutter_inside();
+*translate([top_width/2+center_wall/2+2,0,0]) rotate([90,0,0]) {gutter_inside(notch = true);
     %cube([94,50,50], center=true);
 }
 
-module gutter_inside(h=in * 6){
+3d_benchy_test_boat();
+
+//gutter_twist_lock();
+mirror([1,0,0])
+!bucket_mount();
+
+module 3d_benchy_test_boat(){
+    %translate([0,0,0]) rotate([0,0,90]) gutter_inside(notch = true);
+    
+    s = 2.95;
+    scale([s,s,s]) import("3DBenchy.stl");
+
+}
+
+//this mounts the hose manifold to the bucket.
+module bucket_mount(){
+    top_height = 18;
+    thickness = 17;
+    strap_wall = 5;
+    
+    mount_x_offset = 23;
+    
+    bucket_wall = 3.5;
+    bucket_rim_height = 23.5;
+    
+    bolt_rad = 6/2;
+    bolt_cap_rad = 14/2;
+    
+    min_rad = 1.5;
+    
+    difference(){
+        minkowski(){
+            sphere(r=min_rad);
+    difference(){
+        union(){
+            //top
+            translate([0,0,min_rad]) hull(){
+                cylinder(r=top_height/2-min_rad, h=thickness-min_rad*2);
+                translate([mount_x_offset-top_height/2+strap_wall,0,0]) cylinder(r=top_height/2-min_rad, h=thickness-min_rad*2);
+            }
+            
+            //rear wall
+            translate([mount_x_offset-top_height/2+strap_wall,0,min_rad]) 
+            hull(){
+                #cylinder(r=top_height/2-min_rad, h=thickness-min_rad*2);
+                translate([0,-bucket_rim_height-strap_wall,0]) cylinder(r=top_height/2-min_rad, h=thickness-min_rad*2);
+            }
+        }
+        
+        //bucket cutout
+        translate([mount_x_offset,-top_height/2,0]) {
+            translate([-bucket_wall/2,-bucket_rim_height/2,0]) cube([bucket_wall+min_rad*2, bucket_rim_height+min_rad*2, thickness*3], center=true);
+            translate([-20/2,-(bucket_rim_height-bucket_wall)/2,0]) cube([20+min_rad*2, bucket_rim_height-bucket_wall+min_rad*2, thickness*3], center=true);
+        }
+        
+        
+        //chamfer to make the part look less chunky
+        translate([0,0,50+9]) rotate([0,-17,0]) cube([100,100,100], center=true);
+        
+    }
+    
+    }
+        //hole for the bolt
+        translate([0,0,-1]) cylinder(r=bolt_rad, h=thickness*2);
+        translate([0,0,bolt_rad]) cylinder(r=bolt_cap_rad, h=thickness*2);
+    }
+    
+}
+
+//locking gutter mount
+module gutter_twist_lock(){
+    center_width = in/2;
+    difference(){
+        union(){
+            gutter_inside(h=center_width, notch = true, lock = true);
+            
+            //nubs
+            translate([0,0,top_height-15]) for(i=[0:1]) for(j=[0:1]) mirror([i,0,0]) mirror([0,j,0]) translate([top_width/2*.99,center_width*.333,0]){
+                scale([.5,1,1]) sphere(r=2);
+            }
+        }
+        
+        //big center hollow
+        translate([0, 0, bottom_width/3]) 
+        scale([.75,.75,.75]){
+            gutter_inside(h=center_width*2);
+        }
+        
+        //pipe hole
+        translate([0,0,in/2]) rotate([90,0,0]) {
+            cylinder(r1=in*3/16, r2=in*5/16, h=center_width+3, center=true);
+            cylinder(r1=in*5/16, r2=in*3/16, h=center_width+3, center=true);
+        }
+    }
+}
+
+module gutter_inside(h=in * 6, notch = false, lock = false, twist = false){
     scale([.99,h/10,.99])
     difference(){
         gutter_helper(solid=0);
         echo((top_width/2-4.25)*2*.99);
         
-        for(i=[0,1]) mirror([i,0,0]) translate([50+top_width/2-4.25,0,0]) cube([100,100,200], center=true);
+        if(notch == false){
+            for(i=[0,1]) mirror([i,0,0]) translate([50+top_width/2-4.25,0,0]) cube([100,100,200], center=true);
+        }else{
+            for(i=[0,1]) mirror([i,0,0]) translate([50+top_width/2-4.25,0,100+top_height+wall-.1-notch_inset]) cube([100,100,200], center=true);
+        }
     }
 }
 
