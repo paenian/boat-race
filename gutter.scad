@@ -1,16 +1,15 @@
-in = 25.4;
+include <configuration.scad>
 
-wall = .075*in;
+wall = gutter_wall;
+mount_wall = gutter_mount_wall;
+center_wall = gutter_center_wall;
 
-mount_wall = 6.5;
-center_wall = 16;
 
-
-bottom_width = 2.75*in+.2*in;
-top_width = 4.025*in - wall*2+.2*in;
-mid_height = 1.3*in;
-top_height = 2*in+1;
-min_rad = .15*in;
+bottom_width = gutter_bottom_width;
+top_width = gutter_top_width;
+mid_height = gutter_mid_height;
+top_height = gutter_top_height;
+min_rad = gutter_min_rad;
 
 
 $fn=60;
