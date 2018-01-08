@@ -2,7 +2,7 @@ include <../configuration.scad>
 use <pins2.scad>
 use <../track/gutter.scad>
 
-size = in*1.25;
+size = in*1.2;
 
 pin_rad = 4;
 pin_len = 13;
@@ -61,10 +61,10 @@ if(part == 10){
                 peg_sphere();
         }
         
-        translate([0,-size,0]) {
+        translate([0,-size*3/4,0]) {
             peg_rod();
-            for(i=[0,1]) mirror([i,0,0]) translate([-22/2-size/2+block_slop/2,0,0])
-                peg_sphere();
+            for(i=[0,1]) mirror([i,0,0]) translate([-5/2-size/2+block_slop/2,0,0])
+                peg_rod();
         }
         
         translate([0,size*2,0]) {

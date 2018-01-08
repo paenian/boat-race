@@ -67,13 +67,14 @@ module assembled(){
 //this mounts the hose manifold to the bucket.
 module bucket_mount(){
     top_height = 18;
-    thickness = 17;
-    strap_wall = 5;
+    thickness = 23;
+    strap_wall = 8;
+    bucket_rim_rad = 10;
     
     mount_x_offset = 23;
     
     bucket_wall = 3.5;
-    bucket_rim_height = 23.5;
+    bucket_rim_height = 18.25;
     
     bolt_rad = 6/2;
     bolt_cap_rad = 14/2;
@@ -101,8 +102,18 @@ module bucket_mount(){
         
         //bucket cutout
         translate([mount_x_offset,-top_height/2,0]) {
-            translate([-bucket_wall/2,-bucket_rim_height/2,0]) cube([bucket_wall+min_rad*2, bucket_rim_height+min_rad*2, thickness*3], center=true);
-            translate([-20/2,-(bucket_rim_height-bucket_wall)/2,0]) cube([20+min_rad*2, bucket_rim_height-bucket_wall+min_rad*2, thickness*3], center=true);
+            union(){
+                translate([-bucket_wall/2-bucket_rim_rad+min_rad+bucket_wall/2+min_rad,-bucket_rim_rad+min_rad*2,0]) cylinder(r=bucket_rim_rad-min_rad, h=thickness*3, center=true);
+                translate([-bucket_wall/2,-bucket_rim_height*3/4,0]) cube([bucket_wall+min_rad*2, bucket_rim_height/2+min_rad*2, thickness*3], center=true);
+                
+                %translate([-bucket_wall/2,-bucket_rim_height*2/4,0]) cube([bucket_wall+min_rad*2, bucket_rim_height+min_rad*2, thickness*3], center=true);
+            }
+            intersection(){
+                translate([-20/2,-(bucket_rim_height-bucket_wall)/2,0]) cube([20+min_rad*2, bucket_rim_height-bucket_wall+min_rad*2, thickness*3], center=true);
+                hull(){
+                    translate([-bucket_wall/2-bucket_rim_rad+min_rad+bucket_wall/2+min_rad,-bucket_rim_rad+min_rad*2,0]) cylinder(r=bucket_rim_rad-min_rad, h=thickness*3, center=true);
+                }
+            }
         }
         
         

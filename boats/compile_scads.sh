@@ -13,3 +13,7 @@ openscad -o blockboat_parts/peg_tetrahedron.stl -D part=8 blockboat.scad &
 
 
 #hull forms
+openscad -o hull_forms_parts/canoe.stl -D part=1 hull_forms.scad &
+openscad -o hull_forms_parts/canoe_mold.stl -D part=11 hull_forms.scad &
+openscad -o hull_forms_parts/catamaran.stl -D part=2 hull_forms.scad &
+openscad -o hull_forms_parts/catamaran_mold.stl -D part=21 hull_forms.scad &
