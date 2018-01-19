@@ -93,11 +93,11 @@ module tube(ribs = 10, extra = 0){
 module drain_clamp(){
     elbow_rad = 18/2;
     elbow_len = 8;
-    elbow_drop = 45;
+    elbow_drop = 53;
     
     outer_rad = 35/2;
     
-    cut_angle = 30;
+    cut_angle = 43;
     
     wall = 5;
     
@@ -123,7 +123,7 @@ module drain_clamp(){
         }
         
         //tube hole
-        tube(extra = .2);
+        tube(ribs = 13, extra = 0);
         
         //bind the tube on
         rotate([0,0,-45]) difference(){
