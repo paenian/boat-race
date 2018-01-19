@@ -15,7 +15,7 @@ notch_inset = 12;
 
 $fn=60;
 
-part = 5;
+part = 7;
 
 if(part == 0){
     rotate([90,0,0]) gutter_mount_double(h=20);
@@ -45,6 +45,11 @@ if(part == 6){
     mirror([1,0,0]) bucket_mount();
 }
 
+if(part == 7){
+    drain_clamp();
+}
+
+
 if(part == 10){
     assembled();
 }
@@ -62,6 +67,77 @@ module assembled(){
     //bucket mounts
     translate([10,60,0]) bucket_mount();
     mirror([1,0,0]) translate([10,60,0]) bucket_mount();
+}
+
+module tube(ribs = 10, extra = 0){
+    outer_rad = 35/2;
+    rib_rad = 33/2;
+    pitch = 18/5;
+    rib_thick = 2;
+    rib_base_thick = 3;
+    echo(pitch);
+    
+    union(){
+        for(i=[0:ribs]) translate([0,0,i*pitch]) {
+            union(){
+                cylinder(r=rib_rad+extra, h=pitch+.01, center=true);
+                hull(){
+                    cylinder(r=rib_rad+extra, h=rib_base_thick+extra, center=true);
+                    cylinder(r=outer_rad+extra, h=rib_thick+extra, center=true);
+                }
+            }
+        }
+    }
+}
+
+module drain_clamp(){
+    elbow_rad = 18/2;
+    elbow_len = 8;
+    elbow_drop = 45;
+    
+    outer_rad = 35/2;
+    
+    cut_angle = 30;
+    
+    wall = 5;
+    
+    difference(){
+        union(){
+            //tube clamp body
+            cylinder(r=outer_rad + wall, h=15);
+            
+            //riser
+            translate([-outer_rad-1,0,0]) hull(){
+                translate([3,0,0]) scale([elbow_len/(elbow_rad*2),1,1]) cylinder(r=elbow_rad + wall+1.5, h=15);
+                translate([0,0,elbow_drop]) rotate([0,90,0]) hull(){
+                    cylinder(r=elbow_rad+wall, h=elbow_len, center=true);
+                     cylinder(r=elbow_rad+wall+2, h=elbow_len/3, center=true);             
+                }
+            }
+        }
+        
+        //elbow hole
+        translate([-outer_rad-wall/2+1,0,elbow_drop]) rotate([0,90,0]){
+            cylinder(r=elbow_rad+1, h=elbow_len+5, center=true);
+            for(i=[0,1]) mirror([0,0,i]) translate([0,0,elbow_len/2-2]) cylinder(r1=elbow_rad+1, r2=elbow_rad+10, h=10);
+        }
+        
+        //tube hole
+        tube(extra = .2);
+        
+        //bind the tube on
+        rotate([0,0,-45]) difference(){
+            translate([0,0,-.1]) 
+            intersection(){
+                rotate([0,0,-cut_angle/2]) cube([50,50,50]);
+                rotate([0,0,cut_angle/2]) cube([50,50,50]);
+            }
+            
+            //round the ends nicely
+            rotate([0,0,-cut_angle/2]) translate([0,outer_rad+(wall-.1)/2,0]) cylinder(r=(wall+.1)/2, h=50, center=true);
+            rotate([0,0,-90+cut_angle/2]) translate([0,outer_rad+(wall-.1)/2,0]) cylinder(r=(wall+.1)/2, h=50, center=true);
+        }
+    }
 }
 
 //this mounts the hose manifold to the bucket.
