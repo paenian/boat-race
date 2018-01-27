@@ -11,7 +11,15 @@ wall = 3;
 
 top_slit = 10;
 
-glueHolster();
+union(){
+    for(i=[0:90:359]) rotate([0,0,i]) translate([19,0,0]) glueHolster();
+    difference(){
+        cylinder(r=41, h=wall);
+        for(i=[45:90:359]) rotate([0,0,i]) translate([53,0,0]) cylinder(r=23, h=wall*3, center=true);
+        
+        translate([0,0,wall/2]) for(i=[0,1]) mirror([0,0,i]) translate([0,0,-1]) cylinder(r1=5, r2=11, h=11);
+    }
+}
 
 module glueHolster(){
     
