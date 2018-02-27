@@ -1,9 +1,9 @@
-angle=55;
+angle=51;
 
 inner_rad = 23/2;
-outer_rad = 31/2;
+outer_rad = 35/2;
 
-inner_len = 40;
+inner_len = 35;
 outer_len = 40;
 total_len = outer_len+inner_len;
 lift = 13;
@@ -12,7 +12,7 @@ wall = 3;
 
 top_slit = 10;
 
-!glueHolster();
+//glueHolster();
 
 union(){
     for(i=[0:90:359]) rotate([0,0,i]) translate([17,0,0]) glueHolster();

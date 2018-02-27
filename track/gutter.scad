@@ -91,9 +91,9 @@ module tube(ribs = 10, extra = 0){
 }
 
 module drain_clamp(){
-    elbow_rad = 18/2;
+    elbow_rad = 27/2;
     elbow_len = 8;
-    elbow_drop = 53;
+    elbow_drop = 61;
     
     outer_rad = 35/2;
     
@@ -104,7 +104,7 @@ module drain_clamp(){
     difference(){
         union(){
             //tube clamp body
-            cylinder(r=outer_rad + wall, h=15);
+            cylinder(r=outer_rad + wall, h=17);
             
             //riser
             translate([-outer_rad-1,0,0]) hull(){
