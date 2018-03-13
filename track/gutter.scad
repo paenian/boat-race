@@ -15,7 +15,7 @@ notch_inset = 12;
 
 $fn=60;
 
-part = 7;
+part = 8;
 
 if(part == 0){
     rotate([90,0,0]) gutter_mount_double(h=20);
@@ -49,6 +49,14 @@ if(part == 7){
     drain_clamp();
 }
 
+if(part == 8){
+    rotate([90,0,0]) drip_edge();
+}
+
+if(part == 9){
+    rotate([90,0,0]) drip_inset();
+}
+
 
 if(part == 10){
     assembled();
@@ -67,6 +75,81 @@ module assembled(){
     //bucket mounts
     translate([10,60,0]) bucket_mount();
     mirror([1,0,0]) translate([10,60,0]) bucket_mount();
+}
+
+inset_wall = 1.5;
+inset_len = 5;
+inset_scale = .94;
+
+module drip_inset(){
+    sc = inset_scale;
+    sc2 = sc - .03;
+    
+    bar_sep = 10;
+    
+    difference(){
+        hull() scale([sc,sc,sc]) gutter(h=inset_len);
+        
+        difference(){
+            translate([0,0,inset_wall]) hull() scale([sc2,sc2,sc2-.02]) gutter(h=inset_len+2);
+            for(i=[0:bar_sep:top_width/2]) for(j=[-1,1]) {
+                translate([i*j,0,0]) cube([inset_wall,inset_len*2,100], center=true);
+                translate([0,0,i*j]) rotate([0,90,0]) cube([inset_wall,inset_len*2,100], center=true);
+            }
+        }
+        
+        //cut off the top
+        translate([0,0,100+40+wall/2]) cube([200,200,200], center=true);
+    }
+}
+
+//make sure the water drips into the drain :-)  Basically an endcap.
+module drip_edge(wall = 6, length = 12){
+    difference(){
+        union(){
+            //gutter shape
+            minkowski(){
+                gutter(h=length);
+                //cube([wall,wall,wall], center=true);
+                sphere(r=wall/2, $fn=6);
+            }
+            
+            //extra bottom for the drip
+            translate([0,-wall/2,-gutter_wall/2]) difference(){
+                union(){
+                    hull() for(i=[0,1]) mirror([i,0,0]) translate([bottom_width/2-wall/2,0,0]) rotate([90,0,0]) cylinder(r=wall+gutter_wall/2, h=length, center=true);
+                    hull() for(i=[0,1]) mirror([i,0,0]) translate([bottom_width/2-wall/2,length/2-.1,0]) rotate([-90,0,0]) cylinder(r1=wall+gutter_wall/2, r2=wall, h=wall);
+                }
+                
+                translate([0,0,-wall-gutter_wall/2]) hull(){
+                    translate([0,-length/2+wall+1,0]) rotate([0,90,0]) cylinder(r=wall, h=bottom_width+20, center=true);
+                    translate([0,length,0]) rotate([0,90,0]) cylinder(r=wall, h=bottom_width+20, center=true);
+                    //translate([0,-length/2,-wall*2]) rotate([0,90,0]) cylinder(r=wall, h=bottom_width+20, center=true);
+                }
+            }
+        }
+        
+        //insert gutter here
+        translate([0,wall+.1,0]) {
+            gutter(h=length);
+            cube([.2, .2, .2], center=true);
+        }
+        
+        //slot to stem flow - print a TPU insert to fit
+        sc = inset_scale;
+        translate([0,-wall/2,wall-inset_wall]) minkowski(){
+            scale([sc,sc,sc]) gutter(h=inset_len+.2);
+        }
+        
+        //coax the stream to the center
+        
+        //cut off the top
+        translate([0,0,100+top_height-wall*2]) cube([200,200,200], center=true);
+        
+        //cut off the drippy edge
+        translate([0,-100-length/2-wall/2+.5,0]) cube([200,200,200], center=true);
+        
+    }
 }
 
 module tube(ribs = 10, extra = 0){
@@ -301,6 +384,7 @@ module gutter_mount_double(h=10){
         
     %cylinder(r=center_wall/2, h=200, center=true);
 }
+
 
 //strap a gutter to a surface.  Actually does half a gutter.
 //Double does half of two gutters... they meet in the middle.
