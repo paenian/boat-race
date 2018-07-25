@@ -15,7 +15,7 @@ notch_inset = 12;
 
 $fn=60;
 
-part = 8;
+part = 44;
 
 if(part == 0){
     rotate([90,0,0]) gutter_mount_double(h=20);
@@ -37,6 +37,14 @@ if(part == 4){
     gutter_inside();
 }
 
+if(part == 44){
+    scale([1,in*5/10,1])
+    difference(){
+        gutter_helper(solid = 1, wall=5);
+        translate([0,0,5-gutter_wall]) gutter_helper(solid = 0);
+    }
+}
+
 if(part == 5){
     bucket_mount();
 }
@@ -55,6 +63,10 @@ if(part == 8){
 
 if(part == 9){
     rotate([90,0,0]) drip_inset();
+}
+
+if(part == 91){
+    rotate([90,0,0]) drip_inset_flood();
 }
 
 
@@ -96,6 +108,31 @@ module drip_inset(){
                 translate([i*j,0,0]) cube([inset_wall,inset_len*2,100], center=true);
                 translate([0,0,i*j]) rotate([0,90,0]) cube([inset_wall,inset_len*2,100], center=true);
             }
+        }
+        
+        //cut off the top
+        translate([0,0,100+40+wall/2]) cube([200,200,200], center=true);
+    }
+}
+
+module drip_inset_flood(){
+    sc = inset_scale;
+    sc2 = sc - .03;
+    
+    bar_sep = 10;
+    
+    difference(){
+        hull() scale([sc,sc,sc]) gutter(h=inset_len);
+        
+        difference(){
+            translate([0,0,inset_wall]) hull() scale([sc2,sc2,sc2-.02]) gutter(h=inset_len+2);
+            for(i=[0:bar_sep:top_width/2]) for(j=[-1,1]) {
+                translate([i*j,0,0]) cube([inset_wall,inset_len*2,100], center=true);
+                translate([0,0,i*j]) rotate([0,90,0]) cube([inset_wall,inset_len*2,100], center=true);
+            }
+            
+            //block the bottom three rows
+            cube([100,25,bar_sep*6], center=true);
         }
         
         //cut off the top
