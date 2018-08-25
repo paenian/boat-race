@@ -1,6 +1,6 @@
 
 in = 25.4;
-height = 137;
+height = 131;
 rad = 19;
 leg_rad = 7;
 leg_angle = 13+4;
@@ -9,6 +9,13 @@ leg_angle = 13+4;
 %cube([200,200,.1], center=true);
 
 wall = 4;
+odoshi_slant = 19;
+mount_height = in*3.25;
+bearing_rad = 22/2+.25;
+bearing_thick = 7;
+bearing_inner_rad = 8/2;
+
+
 
 width = rad+wall/2+leg_rad;
 
@@ -34,15 +41,15 @@ inlet_offset = 0;
 echo(drip_rad-drip_wall);
 echo(inlet_rad-inlet_wall);
 
-axle_rad = 7/2;
+axle_rad = 4.5;
 
-odoshi_angle = 41;
-odoshi_lift = 31; //29;   //this is the space at the base, so that we're sure it'll get top-heavy and tip over.
+odoshi_angle = 53;
+odoshi_lift = 41; //29;   //this is the space at the base, so that we're sure it'll get top-heavy and tip over.
 extra_height = 10;
 
 $fn = 60;
 
-part = 10;
+part = 0;
 
 if(part == 0)
     tub();
@@ -56,20 +63,35 @@ if(part == 3)
 if(part == 10){
     union(){
         tub();
-        translate([0,0,in*4]) rotate([0,0,-135]) rotate([-odoshi_angle*0,0,0]) odoshi();
+        translate([0,0,mount_height]) rotate([0,0,-135]) rotate([-odoshi_angle*0,0,0]) odoshi();
     }
 }
 
-module tub(rad=175, inner_rad=175-in*3, height=in*4, min_rad=wall, min_rad2=wall*2, base_height=in*3, cutout_angle=31){
+module tub(rad=175, inner_rad=175-in*3, height=mount_height+bearing_rad*.5, min_rad=wall, min_rad2=wall*2, base_height=mount_height-in/2, cutout_angle=23){
     translate([-rad/2,-rad/2,0]) 
     difference(){
         minkowski(){
-            intersection(){
-                difference(){
-                    cylinder(r=rad-min_rad, h=height-min_rad);
-                    cylinder(r=inner_rad+min_rad, h=height*3, center=true);
+            union(){
+                intersection(){
+                    //round section
+                    difference(){
+                        cylinder(r=rad-min_rad, h=height-min_rad);
+                        cylinder(r=inner_rad+min_rad, h=height*3, center=true);
+                    }
+                    
+                    translate([min_rad,min_rad,-1]) cube([200,200,200]);
                 }
-                translate([min_rad,min_rad,-1]) cube([200,200,200]);
+                
+                //mount the bearing
+                difference(){
+                    rotate([0,0,45]) translate([inner_rad+min_rad,0,0]) rotate([0,90,0]) hull(){
+                        translate([-mount_height,0,0]) cylinder(r=bearing_rad+wall/2, h=bearing_thick+wall+3, center=true);
+                        translate([-mount_height/2,0,0]) cylinder(r=wall/2, h=1, center=true);
+                    }
+                    
+                    //open up the top of the mount
+                    rotate([0,0,45]) translate([inner_rad+min_rad,0,mount_height])  rotate([0,-90,0]) translate([0,0,-bearing_thick*3]) rotate([0,0,0]) for(i=[-1,1]) rotate([0,0,i*24]) cube([bearing_rad*2, bearing_rad*2, bearing_thick*6]);
+                }
             }
             sphere(r=min_rad, $fn=8);
         }
@@ -84,6 +106,20 @@ module tub(rad=175, inner_rad=175-in*3, height=in*4, min_rad=wall, min_rad2=wall
                 translate([wall+min_rad2,wall+min_rad2,-1]) cube([200,200,200]);
             }
             sphere(r=min_rad2, $fn=8);
+        }
+        
+        //bearing hole
+        rotate([0,0,45]) translate([inner_rad+min_rad-wall-1,0,0]) rotate([0,90,0]) translate([-mount_height,0,0]) {
+            hull(){
+                cylinder(r=bearing_rad, h=bearing_thick-.5, center=true);
+                rotate([0,0,-45]) translate([-bearing_rad*2,0,0]) cylinder(r=bearing_rad+.5, h=bearing_thick+.5, center=true);
+                
+                for(i=[0:1]) mirror([0,0,i]) translate([0,0,bearing_thick/2]) cylinder(r=bearing_rad-.5, h=.5, center=true);
+            }
+            hull(){
+                cylinder(r=bearing_rad-2, h=wall*5, center=true);
+                rotate([0,0,-45]) translate([-bearing_rad*2,0,0]) cylinder(r=bearing_rad-1, h=wall*5, center=true);
+            }
         }
         
         //window in front - so one side contains splash
@@ -359,25 +395,33 @@ module odoshi(wall = 2, height = extra_height+height){
             translate([0,0,0]) cylinder(r=rad, h=height, center=true);
             
             //axle
-            rotate([0,90,0]) cap_tube(r=axle_rad+wall+1, h=rad*2, solid=1, wall=wall);
+            echo(axle_rad);
+            translate([wall,0,0]) rotate([0,90,0]) hull(){
+                cap_tube(r=axle_rad+wall, h=rad*2, solid=1, wall=wall);
+                cap_tube(r=axle_rad+wall*3, h=rad*2-wall*3, solid=1, wall=wall);
+            }
         }
         
         //hollow it out
         difference(){
             translate([0,0,-.1]) cylinder(r=rad-wall, h=height*2, center=true);
             //the bottom :-)
-            translate([0,0,-height/2+odoshi_lift]) cube([100,100,wall], center=true);
+            #translate([0,0,-height/2+odoshi_lift]) cube([100,100,wall*2], center=true);
+            %translate([0,0,height/2-odoshi_lift]) cube([100,100,wall*2], center=true);
             
             //axle repeated
-            rotate([0,90,0]) cap_tube(r=axle_rad+wall+1, h=rad*2, solid=1, wall=wall);
+            rotate([0,90,0]) cap_tube(r=axle_rad+wall, h=rad*3, solid=1, wall=wall);
+            rotate([0,-90,0]) cap_tube(r=axle_rad+wall, h=rad*3, solid=1, wall=wall);
         }
         
         //axle hole
-        rotate([0,90,0]) cap_tube(r=axle_rad+wall+1, h=rad*2+leg_rad*2+wall*2, solid=-1, wall=wall);
-        rotate([0,-90,0]) cap_tube(r=axle_rad+wall+1, h=rad*2+leg_rad*2+wall*2, solid=-1, wall=wall);
+        #translate([wall+1,0,0]) {
+            rotate([0,90,0]) cap_tube(r=axle_rad, h=rad*2, solid=-1, wall=.5);
+            rotate([0,-90,0]) cap_tube(r=axle_rad, h=rad*2, solid=-1, wall=.5);
+        }
         
         //cut the top
-        rotate([-odoshi_angle,0,0]) translate([0,0,height/2+50-29-13-2]) cube([200,200,100], center=true);
+        rotate([-odoshi_angle,0,0]) translate([0,0,height/2+50-29-11]) cube([200,200,100], center=true);
         
         //cut the bottom?
     }
